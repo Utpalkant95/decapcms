@@ -4,25 +4,26 @@
     <meta charset="utf-8" />
     <title>Decap CMS</title>
 
-    <!-- Skip automatic CMS boot -->
+    <!-- Tell CMS not to auto-init -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
 
-    <!-- Load Decap CMS library -->
+    <!-- Load Decap CMS -->
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
   </head>
   <body>
     <script>
       document.addEventListener('DOMContentLoaded', async function () {
-        // Extract token from ?access_token or #access_token
+        // Get access_token from ? or # in URL
         const url = new URL(window.location.href);
         const searchToken = url.searchParams.get("access_token");
         const hashToken = new URLSearchParams(window.location.hash.slice(1)).get("access_token");
         const jwt = searchToken || hashToken;
 
         if (!jwt) {
-          console.log("ℹ️ No JWT yet – default GitHub login will show.");
+          console.log("ℹ️ No JWT yet – default GitHub login will be shown.");
+          window.CMS.init(); // 🔁 Init default CMS login
           return;
         }
 
@@ -39,7 +40,7 @@
             throw new Error("❌ GitHub token not returned from /validate");
           }
 
-          // Start Decap CMS with GitHub token
+          // Manual CMS Init with validated GitHub token
           window.CMS.init({
             config: {
               backend: {
