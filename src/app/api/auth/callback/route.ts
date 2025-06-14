@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       client_id: process.env.GITHUB_CLIENT_ID,
       client_secret: process.env.GITHUB_CLIENT_SECRET,
       code,
-      redirect_uri: `${process.env.BASE_URL}/api/auth/callback`, // ADD THIS
+      redirect_uri: `${process.env.BASE_URL}/api/auth/callback`,
     }),
   });
 
@@ -30,6 +30,6 @@ export async function GET(req: NextRequest) {
   });
 
   return NextResponse.redirect(
-    `${process.env.BASE_URL}/admin?access_token=${jwtToken}` // ✅ query param
+    `${process.env.BASE_URL}/admin?access_token=${jwtToken}`
   );
 }
