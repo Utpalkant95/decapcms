@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Decap CMS</title>
+    <script>
+      window.CMS_MANUAL_INIT = true;
+    </script>
+    <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
+  </head>
+  <body>
+    <script>
+      document.addEventListener('DOMContentLoaded', async function () {
+        const url = new URL(window.location.href);
+        const jwt = url.searchParams.get("access_token");
+
+        if (!jwt) {
+          console.error("❌ No JWT found");
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/auth/validate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: jwt }),
+          });
+
+          const data = await res.json();
+          if (!data.token) {
+            throw new Error("❌ GitHub token not returned from /validate");
+          }
+
+          // Inject GitHub token for Decap CMS
+          window.CMS.init({
+            config: {
+              backend: {
+                name: "github",
+                repo: "vtnailab/decapcmsv2",
+                branch: "main",
+                auth_token: data.token, // ✅ Set the GitHub access token
+              },
+              media_folder: "public/uploads",
+              public_folder: "/uploads",
+              collections: [
+                {
+                  name: "posts",
+                  label: "Posts",
+                  folder: "content/posts",
+                  create: true,
+                  slug: "{{slug}}",
+                  fields: [
+                    { label: "Title", name: "title", widget: "string" },
+                    { label: "Date", name: "date", widget: "datetime" },
+                    { label: "Body", name: "body", widget: "markdown" },
+                  ],
+                },
+              ],
+            },
+          });
+        } catch (e) {
+          console.error("⚠️ Error during CMS init:", e);
+        }
+      });
+    </script>
+  </body>
+</html>

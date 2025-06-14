@@ -1,0 +1,21 @@
+backend:
+  name: github
+  repo: vtnailab/decapcmsv2
+  branch: main
+  base_url: https://decapcmsv2.vercel.app
+  auth_endpoint: api/auth
+  token_endpoint: api/auth/validate
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "posts"
+    label: "Posts"
+    folder: "content/posts"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime" }
+      - { label: "Body", name: "body", widget: "markdown" }
