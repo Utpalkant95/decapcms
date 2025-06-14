@@ -4,15 +4,13 @@
     <meta charset="utf-8" />
     <title>Decap CMS</title>
 
-    <!-- Disable auto init -->
+    <!-- Disable Decap auto-init -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
 
-    <!-- Load Decap CMS -->
+    <!-- Load Decap CMS & YAML parser -->
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
-
-    <!-- Load YAML parser BEFORE your script -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   </head>
   <body>
@@ -24,12 +22,13 @@
         const jwt = searchToken || hashToken;
 
         if (!jwt) {
-          console.log("ℹ️ No JWT – showing default login screen");
-          window.CMS.init();
+          // Optional: redirect to auth instead of showing blank
+          window.location.href = "/api/auth";
           return;
         }
 
         try {
+          // Step 1: validate JWT and get GitHub token
           const res = await fetch("/api/auth/validate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -39,18 +38,18 @@
           const data = await res.json();
           if (!data.token) throw new Error("❌ GitHub token not returned");
 
-          // ✅ Fetch config.yml and parse with jsyaml
+          // Step 2: Load config.yml from /admin folder
           const configRes = await fetch("/admin/config.yml");
           const configText = await configRes.text();
           const parsedConfig = jsyaml.load(configText);
 
-          // ✅ Inject the GitHub token
+          // Step 3: Inject GitHub token into config
           parsedConfig.backend.auth_token = data.token;
 
-          // ✅ Initialize CMS
+          // Step 4: Init CMS with full config
           window.CMS.init({ config: parsedConfig });
         } catch (err) {
-          console.error("❌ Failed to load CMS:", err);
+          console.error("❌ CMS Init Error:", err);
           document.body.innerHTML = "<h2 style='color:red;'>CMS initialization failed.</h2>";
         }
       });
