@@ -44,6 +44,7 @@
           const parsedConfig = jsyaml.load(configText);
 
           parsedConfig.backend.auth_token = data.token;
+          parsedConfig.load_config_file = false; 
 
           console.log("✅ Final config before init:", parsedConfig);
 
