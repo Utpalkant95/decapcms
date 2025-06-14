@@ -1,8 +1,8 @@
 backend:
   name: github
-  repo: vtnailab/decapcmsv2
+  repo: Utpalkant95/decapcms
   branch: main
-  base_url: https://decapcmsv2.vercel.app
+  base_url: https://decapcms-lyart.vercel.app
   auth_endpoint: api/auth
   token_endpoint: api/auth/validate
 

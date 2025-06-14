@@ -3,19 +3,26 @@
   <head>
     <meta charset="utf-8" />
     <title>Decap CMS</title>
+
+    <!-- Skip automatic CMS boot -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
+
+    <!-- Load Decap CMS library -->
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
   </head>
   <body>
     <script>
       document.addEventListener('DOMContentLoaded', async function () {
+        // Extract token from ?access_token or #access_token
         const url = new URL(window.location.href);
-        const jwt = url.searchParams.get("access_token");
+        const searchToken = url.searchParams.get("access_token");
+        const hashToken = new URLSearchParams(window.location.hash.slice(1)).get("access_token");
+        const jwt = searchToken || hashToken;
 
         if (!jwt) {
-          console.error("❌ No JWT found");
+          console.log("ℹ️ No JWT yet – default GitHub login will show.");
           return;
         }
 
@@ -27,18 +34,19 @@
           });
 
           const data = await res.json();
+
           if (!data.token) {
             throw new Error("❌ GitHub token not returned from /validate");
           }
 
-          // Inject GitHub token for Decap CMS
+          // Start Decap CMS with GitHub token
           window.CMS.init({
             config: {
               backend: {
                 name: "github",
                 repo: "vtnailab/decapcmsv2",
                 branch: "main",
-                auth_token: data.token, // ✅ Set the GitHub access token
+                auth_token: data.token,
               },
               media_folder: "public/uploads",
               public_folder: "/uploads",
