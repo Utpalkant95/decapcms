@@ -4,23 +4,28 @@
     <meta charset="utf-8" />
     <title>Decap CMS</title>
 
+    <!-- Disable auto init -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
 
+    <!-- Load Decap CMS -->
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
+
+    <!-- Load YAML parser BEFORE your script -->
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   </head>
   <body>
     <script>
-      document.addEventListener('DOMContentLoaded', async function () {
+      document.addEventListener("DOMContentLoaded", async function () {
         const url = new URL(window.location.href);
         const searchToken = url.searchParams.get("access_token");
         const hashToken = new URLSearchParams(window.location.hash.slice(1)).get("access_token");
         const jwt = searchToken || hashToken;
 
         if (!jwt) {
-          console.log("ℹ️ No JWT yet – loading default Decap login");
-          window.CMS.init(); // fallback to built-in GitHub login
+          console.log("ℹ️ No JWT – showing default login screen");
+          window.CMS.init();
           return;
         }
 
@@ -32,26 +37,20 @@
           });
 
           const data = await res.json();
-          if (!data.token) {
-            throw new Error("❌ GitHub token not returned");
-          }
+          if (!data.token) throw new Error("❌ GitHub token not returned");
 
-          // ✅ Fetch config.yml manually
+          // ✅ Fetch config.yml and parse with jsyaml
           const configRes = await fetch("/admin/config.yml");
           const configText = await configRes.text();
+          const parsedConfig = jsyaml.load(configText);
 
-          // ✅ Parse YAML to JS
-          const parsedConfig = window.CMS?.config?.loadConfig
-            ? await window.CMS.config.loadConfig(configText)
-            : jsyaml.load(configText); // fallback
-
-          // ✅ Inject token into config
+          // ✅ Inject the GitHub token
           parsedConfig.backend.auth_token = data.token;
 
-          // ✅ Start CMS
+          // ✅ Initialize CMS
           window.CMS.init({ config: parsedConfig });
-        } catch (e) {
-          console.error("⚠️ Failed to load CMS:", e);
+        } catch (err) {
+          console.error("❌ Failed to load CMS:", err);
           document.body.innerHTML = "<h2 style='color:red;'>CMS initialization failed.</h2>";
         }
       });
