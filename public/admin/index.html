@@ -4,12 +4,12 @@
     <meta charset="utf-8" />
     <title>Decap CMS</title>
 
-    <!-- Disable Decap auto-init -->
+    <!-- Manual init mode -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
 
-    <!-- Load Decap CMS & YAML parser -->
+    <!-- CMS & YAML -->
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   </head>
@@ -22,13 +22,12 @@
         const jwt = searchToken || hashToken;
 
         if (!jwt) {
-          // Optional: redirect to auth instead of showing blank
+          // redirect to login
           window.location.href = "/api/auth";
           return;
         }
 
         try {
-          // Step 1: validate JWT and get GitHub token
           const res = await fetch("/api/auth/validate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -37,16 +36,17 @@
 
           const data = await res.json();
           if (!data.token) throw new Error("❌ GitHub token not returned");
+          console.log("✅ GitHub token:", data.token);
 
-          // Step 2: Load config.yml from /admin folder
+          // Load CMS config
           const configRes = await fetch("/admin/config.yml");
           const configText = await configRes.text();
           const parsedConfig = jsyaml.load(configText);
 
-          // Step 3: Inject GitHub token into config
           parsedConfig.backend.auth_token = data.token;
 
-          // Step 4: Init CMS with full config
+          console.log("✅ Final config before init:", parsedConfig);
+
           window.CMS.init({ config: parsedConfig });
         } catch (err) {
           console.error("❌ CMS Init Error:", err);
