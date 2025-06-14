@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>Decap CMS</title>
 
-    <!-- Tell CMS not to auto-init -->
+    <!-- Disable auto-init -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
@@ -15,7 +15,6 @@
   <body>
     <script>
       document.addEventListener('DOMContentLoaded', async function () {
-        // Get access_token from ? or # in URL
         const url = new URL(window.location.href);
         const searchToken = url.searchParams.get("access_token");
         const hashToken = new URLSearchParams(window.location.hash.slice(1)).get("access_token");
@@ -23,7 +22,7 @@
 
         if (!jwt) {
           console.log("ℹ️ No JWT yet – default GitHub login will be shown.");
-          window.CMS.init(); // 🔁 Init default CMS login
+          window.CMS.init(); // ✅ loads config.yml automatically
           return;
         }
 
@@ -40,31 +39,15 @@
             throw new Error("❌ GitHub token not returned from /validate");
           }
 
-          // Manual CMS Init with validated GitHub token
+          // ✅ Pass only the token, let the rest come from config.yml
           window.CMS.init({
             config: {
               backend: {
                 name: "github",
-                repo: "vtnailab/decapcmsv2",
+                repo: "Utpalkant95/decapcms", // use your correct repo
                 branch: "main",
                 auth_token: data.token,
               },
-              media_folder: "public/uploads",
-              public_folder: "/uploads",
-              collections: [
-                {
-                  name: "posts",
-                  label: "Posts",
-                  folder: "content/posts",
-                  create: true,
-                  slug: "{{slug}}",
-                  fields: [
-                    { label: "Title", name: "title", widget: "string" },
-                    { label: "Date", name: "date", widget: "datetime" },
-                    { label: "Body", name: "body", widget: "markdown" },
-                  ],
-                },
-              ],
             },
           });
         } catch (e) {
