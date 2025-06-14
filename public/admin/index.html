@@ -44,6 +44,8 @@
           const parsedConfig = jsyaml.load(configText);
 
           parsedConfig.backend.auth_token = data.token;
+
+          parsedConfig.backend.display_url = "https://decapcms-lyart.vercel.app";
           parsedConfig.backend.use_graphql = false;
 
           parsedConfig.load_config_file = false; 
