@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   if (!code)
     return NextResponse.json({ error: "Missing code" }, { status: 400 });
 
-  const tokenRes = await fetch(`https://github.com/login/oauth/access_token`, {
+  const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -29,7 +29,6 @@ export async function GET(req: NextRequest) {
     expiresIn: "1h",
   });
 
-  // ✅ Redirect to new client route for storing token
   return NextResponse.redirect(
     `${process.env.BASE_URL}/admin/auth-bridge#access_token=${jwtToken}`
   );
