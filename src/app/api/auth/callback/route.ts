@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
-  if (!code)
+  if (!code) {
     return NextResponse.json({ error: "Missing code" }, { status: 400 });
+  }
 
   const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
@@ -22,14 +22,12 @@ export async function GET(req: NextRequest) {
 
   const { access_token } = await tokenRes.json();
 
-  if (!access_token)
+  if (!access_token) {
     return NextResponse.json({ error: "Token not received" }, { status: 500 });
+  }
 
-  const jwtToken = jwt.sign({ access_token }, process.env.JWT_SECRET!, {
-    expiresIn: "1h",
-  });
-
+  // ✅ Just return the token in hash for frontend
   return NextResponse.redirect(
-    `${process.env.BASE_URL}/admin/auth-bridge#access_token=${jwtToken}`
+    `${process.env.BASE_URL}/admin/auth-bridge#access_token=${access_token}`
   );
 }

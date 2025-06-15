@@ -3,64 +3,49 @@
   <head>
     <meta charset="utf-8" />
     <title>Decap CMS</title>
-
-    <!-- Manual init mode -->
-    <script>
-      window.CMS_MANUAL_INIT = true;
-    </script>
-
-    <!-- CMS & YAML -->
+    <script>window.CMS_MANUAL_INIT = true;</script>
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   </head>
   <body>
     <script>
-      document.addEventListener("DOMContentLoaded", async function () {
-        const jwt = sessionStorage.getItem("cms_jwt");
+      document.addEventListener("DOMContentLoaded", function () {
+        const token = localStorage.getItem("cms_github_token");
 
-        if (!jwt) {
+        if (!token) {
           window.location.href = "/api/auth";
           return;
         }
 
-        try {
-          // Validate the JWT with your backend
-          const res = await fetch("/api/auth/validate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: jwt }),
-          });
+        const config = {
+          backend: {
+            name: "github",
+            repo: "Utpalkant95/decapcms",
+            branch: "main",
+            base_url: "https://decapcms-lyart.vercel.app",
+            auth_endpoint: "api/auth",
+            token: token,
+          },
+          site_url: "https://decapcms-lyart.vercel.app",
+          load_config_file: false,
+          media_folder: "public/uploads",
+          public_folder: "/uploads",
+          collections: [
+            {
+              name: "posts",
+              label: "Posts",
+              folder: "content/posts",
+              create: true,
+              slug: "{{slug}}",
+              fields: [
+                { label: "Title", name: "title", widget: "string" },
+                { label: "Date", name: "date", widget: "datetime" },
+                { label: "Body", name: "body", widget: "markdown" }
+              ]
+            }
+          ]
+        };
 
-          const data = await res.json();
-          if (!data.token) throw new Error("❌ GitHub token not returned");
-          console.log("✅ GitHub token:", data.token);
-
-          // Load the YAML config
-          const configRes = await fetch("/admin/config.yml");
-          const configText = await configRes.text();
-          const parsedConfig = jsyaml.load(configText);
-
-          // Inject the auth token and other necessary overrides
-          parsedConfig.backend.auth_token = data.token;
-
-          parsedConfig.backend.display_url = "https://decapcms-lyart.vercel.app";
-          parsedConfig.backend.use_graphql = false;
-
-          // Critical: ensure CMS does not try to load config.yml again
-          parsedConfig.load_config_file = false;
-
-          // Critical: ensure proper repo auth validation
-          parsedConfig.site_url = "https://decapcms-lyart.vercel.app";
-
-          console.log("✅ Final config before init:", parsedConfig);
-
-          // Init CMS manually
-          window.CMS.init({ config: parsedConfig });
-        } catch (err) {
-          console.error("❌ CMS Init Error:", err);
-          document.body.innerHTML =
-            "<h2 style='color:red;'>CMS initialization failed.</h2>";
-        }
+        window.CMS.init({ config });
       });
     </script>
   </body>
