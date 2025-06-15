@@ -27,7 +27,6 @@ export async function GET(req: NextRequest) {
   }
 
   // ✅ Just return the token in hash for frontend
-  return NextResponse.redirect(
-    `${process.env.BASE_URL}/admin/auth-bridge#access_token=${access_token}`
-  );
+  return NextResponse.redirect(`${process.env.BASE_URL}/cms/auth-bridge#access_token=${access_token}`);
+
 }
