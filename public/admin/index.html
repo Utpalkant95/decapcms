@@ -4,25 +4,19 @@
     <meta charset="utf-8" />
     <title>Decap CMS</title>
 
-    <!-- Manual init mode -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
 
-    <!-- CMS & YAML -->
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   </head>
   <body>
     <script>
       document.addEventListener("DOMContentLoaded", async function () {
-        const url = new URL(window.location.href);
-        const searchToken = url.searchParams.get("access_token");
-        const hashToken = new URLSearchParams(window.location.hash.slice(1)).get("access_token");
-        const jwt = searchToken || hashToken;
+        const jwt = sessionStorage.getItem("cms_jwt");
 
         if (!jwt) {
-          // redirect to login
           window.location.href = "/api/auth";
           return;
         }
@@ -38,7 +32,6 @@
           if (!data.token) throw new Error("❌ GitHub token not returned");
           console.log("✅ GitHub token:", data.token);
 
-          // Load CMS config
           const configRes = await fetch("/admin/config.yml");
           const configText = await configRes.text();
           const parsedConfig = jsyaml.load(configText);
@@ -46,11 +39,9 @@
           parsedConfig.backend.auth_token = data.token;
           parsedConfig.backend.display_url = "https://decapcms-lyart.vercel.app";
           parsedConfig.backend.use_graphql = false;
-
-          parsedConfig.load_config_file = false; 
+          parsedConfig.load_config_file = false;
 
           console.log("✅ Final config before init:", parsedConfig);
-
           window.CMS.init({ config: parsedConfig });
         } catch (err) {
           console.error("❌ CMS Init Error:", err);

@@ -29,7 +29,12 @@ export async function GET(req: NextRequest) {
     expiresIn: "1h",
   });
 
-  return NextResponse.redirect(
-    `${process.env.BASE_URL}/admin?access_token=${jwtToken}`
-  );
+  return new NextResponse(`
+    <script>
+      sessionStorage.setItem("cms_jwt", "${jwtToken}");
+      window.location.href = "/admin";
+    </script>
+  `, {
+    headers: { "Content-Type": "text/html" },
+  });
 }
