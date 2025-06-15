@@ -12,7 +12,7 @@ export default function AuthBridge() {
 
     if (token) {
       localStorage.setItem('cms_github_token', token);  // 🔐 store raw GitHub token
-      router.push('/admin');
+      router.push('/cms');
     } else {
       router.push('/api/auth');
     }
