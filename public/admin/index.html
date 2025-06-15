@@ -3,9 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <title>Decap CMS</title>
+
+    <!-- Manual init mode -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
+
+    <!-- CMS & YAML -->
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   </head>
@@ -20,7 +24,7 @@
         }
 
         try {
-          // Validate JWT
+          // Validate the JWT with your backend
           const res = await fetch("/api/auth/validate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -29,29 +33,33 @@
 
           const data = await res.json();
           if (!data.token) throw new Error("❌ GitHub token not returned");
-
           console.log("✅ GitHub token:", data.token);
 
-          // Load config
+          // Load the YAML config
           const configRes = await fetch("/admin/config.yml");
           const configText = await configRes.text();
           const parsedConfig = jsyaml.load(configText);
 
+          // Inject the auth token and other necessary overrides
           parsedConfig.backend.auth_token = data.token;
 
           parsedConfig.backend.display_url = "https://decapcms-lyart.vercel.app";
           parsedConfig.backend.use_graphql = false;
 
-          // ✅ Ensure this is set
+          // Critical: ensure CMS does not try to load config.yml again
           parsedConfig.load_config_file = false;
+
+          // Critical: ensure proper repo auth validation
+          parsedConfig.site_url = "https://decapcms-lyart.vercel.app";
 
           console.log("✅ Final config before init:", parsedConfig);
 
-          // Initialize CMS only once config is ready
+          // Init CMS manually
           window.CMS.init({ config: parsedConfig });
         } catch (err) {
           console.error("❌ CMS Init Error:", err);
-          document.body.innerHTML = "<h2 style='color:red;'>CMS initialization failed.</h2>";
+          document.body.innerHTML =
+            "<h2 style='color:red;'>CMS initialization failed.</h2>";
         }
       });
     </script>
