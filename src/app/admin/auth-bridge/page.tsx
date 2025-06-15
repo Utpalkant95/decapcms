@@ -13,7 +13,7 @@ export default function AuthBridge() {
 
     if (token) {
       sessionStorage.setItem("cms_jwt", token);
-      router.push("/admin");
+      router.push("/admin?done=true");
     } else {
       router.push("/api/auth");
     }
