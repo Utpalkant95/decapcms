@@ -29,12 +29,8 @@ export async function GET(req: NextRequest) {
     expiresIn: "1h",
   });
 
-  return new NextResponse(`
-    <script>
-      sessionStorage.setItem("cms_jwt", "${jwtToken}");
-      window.location.href = "/admin";
-    </script>
-  `, {
-    headers: { "Content-Type": "text/html" },
-  });
+  // ✅ Redirect to new client route for storing token
+  return NextResponse.redirect(
+    `${process.env.BASE_URL}/admin/auth-bridge#access_token=${jwtToken}`
+  );
 }
