@@ -3,11 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <title>Decap CMS</title>
-
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
-
     <script src="https://unpkg.com/decap-cms@latest/dist/decap-cms.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   </head>
@@ -22,6 +20,7 @@
         }
 
         try {
+          // Validate JWT
           const res = await fetch("/api/auth/validate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -30,8 +29,10 @@
 
           const data = await res.json();
           if (!data.token) throw new Error("❌ GitHub token not returned");
+
           console.log("✅ GitHub token:", data.token);
 
+          // Load config
           const configRes = await fetch("/admin/config.yml");
           const configText = await configRes.text();
           const parsedConfig = jsyaml.load(configText);
@@ -39,9 +40,13 @@
           parsedConfig.backend.auth_token = data.token;
           parsedConfig.backend.display_url = "https://decapcms-lyart.vercel.app";
           parsedConfig.backend.use_graphql = false;
+
+          // ✅ Ensure this is set
           parsedConfig.load_config_file = false;
 
           console.log("✅ Final config before init:", parsedConfig);
+
+          // Initialize CMS only once config is ready
           window.CMS.init({ config: parsedConfig });
         } catch (err) {
           console.error("❌ CMS Init Error:", err);
