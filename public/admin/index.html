@@ -23,7 +23,8 @@
             branch: "main",
             base_url: "https://decapcms-lyart.vercel.app",
             auth_endpoint: "api/auth",
-            token: token,
+            auth_token: token, // ✅ use 'auth_token', NOT 'token'
+            use_graphql: false // ✅ explicitly disable GraphQL
           },
           site_url: "https://decapcms-lyart.vercel.app",
           load_config_file: false,
@@ -44,6 +45,9 @@
             }
           ]
         };
+
+        console.log("✅ GitHub Token:", token);
+        console.log("✅ Final CMS Config:", config);
 
         window.CMS.init({ config });
       });
